@@ -1,0 +1,36 @@
+CarePark-KR  -  CT-351 Knowledge Representation & Reasoning, Complex Computing Problem
+Smart Parking Access & Space Allocation Reasoning System (hospital car park)
+
+Group: Minhaj Khan (AI-23301), Faraz Khan (AI-23047), Raied Khan (AI-23046), Sabih Salam (AI-23040)
+
+WHAT IS IN THIS FOLDER
+  Report/        CarePark-KR_CCP_Report.pdf and .docx  (the CCP report)
+  Source_Code/   the whole project (Prolog reasoner, website, tests, diagrams, traces)
+
+1. READ THE REPORT
+   Report/CarePark-KR_CCP_Report.pdf
+
+2. OPEN THE 3D WEBSITE
+   Source_Code/website/index.html   (double-click; Chrome or Edge; internet needed)
+
+3. RUN THE REASONER
+   Install SWI-Prolog 9 from https://www.swi-prolog.org (tick "add to PATH").
+   Open a terminal in Source_Code/ and run:
+     swipl main.pl                            menu
+     swipl main.pl day                        the whole day: bays, refusals, alerts, fees
+     swipl main.pl scenarios                  22 test cases (22/22 pass)
+     swipl main.pl saturate                   forward chaining trace
+     swipl main.pl prove "admitted(wv_no)"    backward chaining trace and proof tree
+     swipl main.pl whynot "admitted(car_bu)"  why a vehicle is refused
+     swipl main.pl frames | net | fol | dl | script | rules | stats
+
+4. RUN THE TESTS
+     swipl tests/run.pl                       159 Prolog tests
+     node --test tests_js/engine.test.mjs     71 JavaScript tests (needs Node.js 18+)
+
+5. OTHER MATERIAL (in Source_Code/docs/)
+     diagrams/     10 diagrams (PNG, Mermaid sources in src/)
+     generated/    trace sheets and outputs from the commands above
+     screenshots/  every view of the website
+
+Still to fill in by hand: Section and Group number on the report cover page.
