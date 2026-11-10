@@ -1,0 +1,497 @@
+<title>CarePark Control Room</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="CarePark-KR: a knowledge-based parking access and bay allocation system for a hospital car park, with a 3D digital twin and live Prolog-style reasoning.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: an operations console. A slim rail of views on the left, each view a working surface:
+   the digital twin with its day timeline, the reasoning bench, the knowledge explorer, the scenario lab.
+   Wayfinding green from hospital signage is the one accent; emergency red is semantic only. */
+:root {
+  --paper: #f2f5f3;
+  --panel: #ffffff;
+  --well: #e6ece8;
+  --ink: #102019;
+  --ink-2: #4a5d54;
+  --rule: #cfd9d3;
+  --sign: #0a6b4e;
+  --sign-ink: #ffffff;
+  --sign-soft: #d6ebe2;
+  --emerg: #c8283b;
+  --emerg-soft: #f7dde0;
+  --amber: #9a6400;
+  --amber-soft: #f6e8cc;
+  --info: #2360a5;
+  --info-soft: #dce7f5;
+  --twin-sky: #e4ebe7;
+  --twin-ground: #cbd5cf;
+  --twin-slab: #b8c4bd;
+  --twin-line: #ffffff;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0c1411; --panel: #121d18; --well: #1a2822; --ink: #e3ece7; --ink-2: #93a89d; --rule: #26362e;
+    --sign: #3fbf8f; --sign-ink: #06120d; --sign-soft: #143528; --emerg: #ff6b7a; --emerg-soft: #3b171c;
+    --amber: #f0b44a; --amber-soft: #352812; --info: #74a8ec; --info-soft: #17283f;
+    --twin-sky: #0f1915; --twin-ground: #1b2a23; --twin-slab: #27392f; --twin-line: #cfe0d6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0c1411; --panel: #121d18; --well: #1a2822; --ink: #e3ece7; --ink-2: #93a89d; --rule: #26362e;
+  --sign: #3fbf8f; --sign-ink: #06120d; --sign-soft: #143528; --emerg: #ff6b7a; --emerg-soft: #3b171c;
+  --amber: #f0b44a; --amber-soft: #352812; --info: #74a8ec; --info-soft: #17283f;
+  --twin-sky: #0f1915; --twin-ground: #1b2a23; --twin-slab: #27392f; --twin-line: #cfe0d6;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--panel); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--sign); outline-offset: 2px; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: 0.005em; line-height: 1.05; margin: 0; text-wrap: balance; }
+
+/* ---------- shell ---------- */
+.shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); min-height: 100%; }
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); height: calc(100vh - env(safe-area-inset-top, 0px)); background: var(--panel); border-right: 1px solid var(--rule);
+  display: flex; flex-direction: column; padding: 16px 12px; padding-left: max(12px, env(safe-area-inset-left, 0px)); gap: 4px; }
+.mark { display: flex; gap: 10px; align-items: center; padding: 4px 6px 18px; }
+.mark__h { width: 34px; height: 34px; border-radius: 6px; background: var(--sign); color: var(--sign-ink); display: grid; place-items: center; font: 700 22px/1 var(--display); }
+.mark b { font: 700 19px/1 var(--display); display: block; }
+.mark span { font-size: 11.5px; color: var(--ink-2); }
+.rail a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 5px; color: var(--ink-2); text-decoration: none; font-weight: 700; font-size: 14px; }
+.rail a:hover { background: var(--well); color: var(--ink); }
+.rail a[aria-current="page"] { background: var(--sign-soft); color: var(--sign); }
+.rail a i { width: 20px; text-align: center; font-style: normal; font: 600 12px var(--mono); }
+.rail__foot { margin-top: auto; display: grid; gap: 8px; font-size: 12px; color: var(--ink-2); padding: 0 6px; }
+.main { min-width: 0; padding-block: 22px 40px; padding-left: 24px; padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+.view[hidden] { display: none !important; }
+.vhead { display: flex; justify-content: space-between; align-items: end; gap: 18px; flex-wrap: wrap; margin-bottom: 16px; }
+.vhead h1 { font-size: 34px; }
+.vhead p { margin: 4px 0 0; color: var(--ink-2); max-width: 70ch; }
+.eyebrow { font: 600 11px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sign); margin: 0 0 6px; }
+
+.btn { border: 1px solid var(--rule); background: var(--panel); border-radius: 5px; height: 34px; padding: 0 12px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn:hover { background: var(--well); }
+.btn--sign { background: var(--sign); border-color: var(--sign); color: var(--sign-ink); }
+.btn--sign:hover { background: var(--sign); filter: brightness(1.07); }
+.btn[aria-pressed="true"] { background: var(--sign-soft); border-color: var(--sign); color: var(--sign); }
+select { border: 1px solid var(--rule); background: var(--panel); border-radius: 5px; height: 34px; padding: 0 8px; max-width: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--r); }
+.chip { display: inline-flex; align-items: center; gap: 4px; font: 600 11.5px var(--mono); padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+.c-sign { background: var(--sign-soft); color: var(--sign); }
+.c-emerg { background: var(--emerg-soft); color: var(--emerg); }
+.c-amber { background: var(--amber-soft); color: var(--amber); }
+.c-info { background: var(--info-soft); color: var(--info); }
+.c-mute { background: var(--well); color: var(--ink-2); }
+.muted { color: var(--ink-2); }
+.scroll { overflow: auto; }
+table.t { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.t th { text-align: left; font: 600 11px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); padding: 8px 10px; border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: var(--panel); }
+table.t td { padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t td.m { font: 12.5px var(--mono); }
+table.t tr:last-child td { border-bottom: 0; }
+
+/* ---------- twin ---------- */
+.twin { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 14px; }
+.stage { position: relative; height: 600px; border-radius: var(--r); overflow: hidden; background: var(--twin-sky); border: 1px solid var(--rule); }
+#twin3d { position: absolute; inset: 0; }
+#twin3d canvas { display: block; }
+.stage__tl { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; flex-wrap: wrap; pointer-events: none; }
+.clock { background: var(--panel); border: 1px solid var(--rule); border-radius: 5px; padding: 6px 12px; display: flex; gap: 12px; align-items: baseline; }
+.clock b { font: 700 30px/1 var(--display); font-variant-numeric: tabular-nums; }
+.clock span { font-size: 12px; color: var(--ink-2); }
+.stage__tr { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.levels { position: absolute; right: 12px; bottom: 12px; display: grid; gap: 4px; pointer-events: none; }
+.lvl { background: var(--panel); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 8px; display: grid; grid-template-columns: 34px 96px 40px; gap: 8px; align-items: center; font: 12px var(--mono); }
+.lvl__bar { height: 6px; background: var(--well); border-radius: 3px; overflow: hidden; }
+.lvl__bar i { display: block; height: 100%; background: var(--sign); }
+.nogl { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 30px; color: var(--ink-2); }
+.side { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.card { padding: 14px 16px; }
+.card h3 { font-size: 20px; }
+.dlist { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: 13.5px; margin: 10px 0 0; }
+.dlist dt { color: var(--ink-2); }
+.dlist dd { margin: 0; overflow-wrap: anywhere; }
+.reasons { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 3px; font: 12.5px/1.45 var(--mono); }
+.reasons li { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 6px; }
+.ok { color: var(--sign); } .no { color: var(--emerg); } .mid { color: var(--amber); }
+.rid { color: var(--info); font-weight: 600; }
+.feed { max-height: 268px; overflow-y: auto; display: grid; gap: 0; font-size: 13px; }
+.feed button { text-align: left; background: none; border: 0; border-bottom: 1px solid var(--rule); padding: 7px 2px; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 8px; cursor: pointer; align-items: baseline; }
+.feed button:hover { background: var(--well); }
+.feed button.past { opacity: 0.45; }
+.feed button.now { background: var(--sign-soft); }
+.feed time { font: 600 12px var(--mono); color: var(--ink-2); }
+
+.timeline { margin-top: 14px; padding: 12px 16px 14px; }
+.tl__row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.tl__track { position: relative; height: 54px; margin-top: 10px; }
+.tl__axis { position: absolute; left: 0; right: 0; top: 30px; height: 2px; background: var(--rule); }
+.tl__tick { position: absolute; top: 36px; font: 11px var(--mono); color: var(--ink-2); transform: translateX(-50%); }
+.tl__ev { position: absolute; top: 6px; width: 10px; height: 18px; margin-left: -5px; border-radius: 2px; border: 0; padding: 0; cursor: pointer; }
+.tl__ev.k-park { background: var(--sign); }
+.tl__ev.k-denied { background: var(--emerg); }
+.tl__ev.k-leave { background: var(--rule); height: 10px; top: 14px; }
+.tl__ev.k-wait { background: var(--amber); }
+.tl__vis { position: absolute; top: 28px; height: 6px; background: var(--info-soft); }
+input[type="range"] { width: 100%; accent-color: var(--sign); margin: 0; position: absolute; top: 22px; left: 0; height: 18px; background: transparent; }
+
+/* ---------- reasoning ---------- */
+.bench { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; }
+.ask { display: flex; gap: 8px; flex-wrap: wrap; }
+.ask input { flex: 1 1 260px; height: 38px; border: 1px solid var(--rule); border-radius: 5px; background: var(--panel); padding: 0 10px; font-family: var(--mono); font-size: 13.5px; }
+.examples { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 14px; }
+.examples button { font: 500 12px var(--mono); border: 1px solid var(--rule); background: var(--well); border-radius: 3px; padding: 3px 7px; cursor: pointer; }
+.graph { overflow: auto; border-top: 1px solid var(--rule); max-height: 560px; }
+.graph svg { display: block; }
+.graph .nd rect { stroke-width: 1.2; }
+.graph text { font: 12px var(--mono); fill: var(--ink); }
+.graph .v-rule rect { fill: var(--sign-soft); stroke: var(--sign); }
+.graph .v-fact rect { fill: var(--panel); stroke: var(--rule); }
+.graph .v-builtin rect { fill: var(--info-soft); stroke: var(--info); }
+.graph .v-naf rect { fill: var(--amber-soft); stroke: var(--amber); }
+.graph .v-bad rect { fill: var(--emerg-soft); stroke: var(--emerg); }
+.graph .lk { stroke: var(--rule); fill: none; stroke-width: 1.3; }
+.graph .tag { font: 600 10.5px var(--mono); }
+.trace { font: 12px/1.5 var(--mono); white-space: pre; max-height: 520px; overflow: auto; background: var(--well); border-radius: 5px; padding: 10px 12px; margin: 0; }
+.trace .CALL { color: var(--ink); } .trace .EXIT { color: var(--sign); } .trace .FAIL { color: var(--emerg); } .trace .REDO { color: var(--amber); } .trace .TRY { color: var(--info); }
+.verdict { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 16px; font: 13px var(--mono); }
+.grid-wrap { overflow-x: auto; max-width: 100%; }
+.grid-sc { min-width: 420px; display: grid; gap: 2px; font: 11px var(--mono); }
+.grid-sc .cell { border: 0; border-radius: 2px; cursor: pointer; padding: 0; height: 26px; color: var(--ink); }
+.grid-sc .hd { color: var(--ink-2); display: grid; place-items: center; }
+.fires { max-height: 330px; overflow: auto; font: 12px/1.6 var(--mono); padding: 8px 12px; }
+.fires div { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 6px; border-bottom: 1px solid var(--rule); padding: 3px 0; }
+.fires em { font-style: normal; color: var(--ink-2); }
+
+/* ---------- knowledge ---------- */
+.subtabs { display: flex; gap: 2px; border-bottom: 1px solid var(--rule); margin-bottom: 14px; flex-wrap: wrap; }
+.subtabs button { border: 0; background: none; padding: 10px 14px; font-weight: 700; color: var(--ink-2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.subtabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--sign); }
+.kpane[hidden] { display: none; }
+.frame-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 14px; }
+.frame-list { max-height: 640px; overflow: auto; padding: 6px; }
+.frame-list button { display: flex; justify-content: space-between; width: 100%; text-align: left; border: 0; background: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13.5px; }
+.frame-list button:hover { background: var(--well); }
+.frame-list button[aria-current="true"] { background: var(--sign-soft); color: var(--sign); font-weight: 700; }
+.frame-list h4 { font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); margin: 10px 8px 4px; }
+.src { font: 600 11px var(--mono); padding: 1px 6px; border-radius: 3px; white-space: nowrap; }
+.net { position: relative; }
+.net svg { display: block; width: 100%; height: 640px; touch-action: none; }
+.net .lnk { stroke: var(--rule); stroke-width: 1.2; }
+.net .lnk.is_a, .net .lnk.instance_of { stroke: var(--ink-2); }
+.net .lnk.part_of { stroke-dasharray: 5 4; }
+.net .lnk.has_a { stroke: var(--sign); }
+.net .lnk.hl { stroke: var(--emerg); stroke-width: 2.6; }
+.net .nodeg circle { stroke: var(--panel); stroke-width: 2; cursor: pointer; }
+.net .nodeg text { font: 11.5px var(--body); fill: var(--ink); pointer-events: none; }
+.net .nodeg.hl circle { stroke: var(--emerg); stroke-width: 3; }
+.net .lab { font: 10px var(--mono); fill: var(--ink-2); }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); padding: 10px 14px; }
+.legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 5px; }
+.axgroup h4 { font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); margin: 14px 0 6px; }
+.axgroup ul { list-style: none; margin: 0; padding: 0; columns: 3 220px; column-gap: 24px; font: 12.5px/1.75 var(--mono); }
+.axgroup li { break-inside: avoid; }
+.rules-group h3 { font-size: 18px; margin: 16px 0 6px; }
+.scene-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.scene { padding: 12px; position: relative; }
+.scene b { font: 700 28px/1 var(--display); color: var(--sign); }
+.scene h4 { margin: 4px 0; font-size: 15px; }
+.scene p { margin: 0 0 6px; font-size: 13px; color: var(--ink-2); }
+
+/* ---------- scenarios ---------- */
+.lab { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 14px; align-items: start; }
+.sc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.sc { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.sc header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sc h3 { font-size: 18px; }
+.sc p { margin: 0; font-size: 13px; color: var(--ink-2); flex: 1; }
+.sc .chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.builder { padding: 14px 16px; display: grid; gap: 12px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.builder fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; }
+.builder legend { font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); padding: 0; margin-bottom: 4px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 13.5px; }
+.row input[type="range"] { position: static; height: auto; }
+.row output { font: 600 12px var(--mono); min-width: 46px; text-align: right; }
+.bays { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.bays button { font: 600 11px var(--mono); padding: 5px 0; border-radius: 3px; border: 1px solid var(--rule); background: var(--panel); cursor: pointer; }
+.bays button[aria-pressed="true"] { background: var(--emerg-soft); color: var(--emerg); border-color: var(--emerg); text-decoration: line-through; }
+.delta { font: 12px/1.6 var(--mono); background: var(--well); border-radius: 4px; padding: 8px 10px; max-height: 140px; overflow: auto; overflow-wrap: anywhere; }
+
+/* ---------- about ---------- */
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0; }
+.stat { padding: 14px 16px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.stat b { display: block; font: 700 32px/1 var(--display); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12.5px; color: var(--ink-2); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+pre.cmd { font: 12.5px/1.65 var(--mono); background: var(--well); border-radius: 4px; padding: 10px 12px; overflow-x: auto; margin: 8px 0 0; }
+
+/* labels inside the 3D view */
+.tl3 { font: 600 11px var(--mono); padding: 2px 6px; border-radius: 3px; background: var(--panel); color: var(--ink); border: 1px solid var(--rule); white-space: nowrap; pointer-events: none; }
+.tl3.zone { font: 700 11px var(--display); letter-spacing: .05em; text-transform: uppercase; background: var(--sign); color: var(--sign-ink); border-color: var(--sign); }
+.tl3.dept { font: 600 10px var(--display); letter-spacing: .05em; text-transform: uppercase; background: rgba(255,255,255,.72); color: #3d5249; border: 1px solid rgba(10,107,78,.35); padding: 1px 5px; opacity: .8; }
+.tl3.dept.on { font-size: 12px; background: #fff; color: #0a6b4e; border: 2px solid #0a6b4e; opacity: 1; z-index: 5; }
+.tl3.lvlname { background: transparent; border: 0; color: var(--ink-2); font: 700 14px var(--display); }
+.tl3.veh { font-family: var(--body); font-size: 12px; }
+.tl3.veh.go { background: var(--sign); color: var(--sign-ink); border-color: var(--sign); }
+.tl3.veh.stop { background: var(--emerg); color: #fff; border-color: var(--emerg); }
+.tl3.veh.wait { background: var(--amber); color: #fff; border-color: var(--amber); }
+.tl3.veh.sel { outline: 2px solid var(--info); }
+
+@media (max-width: 1100px) {
+  .twin, .bench, .lab, .frame-layout, .two { grid-template-columns: minmax(0, 1fr); }
+  .scene-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .builder { position: static; }
+}
+@media (max-width: 760px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: sticky; height: auto; flex-direction: row; overflow-x: auto; padding: 8px max(10px, env(safe-area-inset-left, 0px)); border-right: 0; border-bottom: 1px solid var(--rule); z-index: 20; }
+  .mark { padding: 0 6px 0 0; }
+  .mark span, .rail__foot, .rail a i { display: none; }
+  .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .stage { height: 420px; }
+  .sc-grid { grid-template-columns: minmax(0, 1fr); }
+  .scene-strip { grid-template-columns: minmax(0, 1fr); }
+  .levels { display: none; }
+  .vhead h1 { font-size: 28px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="shell">
+  <nav class="rail" aria-label="Views">
+    <div class="mark"><div class="mark__h" aria-hidden="true">P</div><div><b>CarePark</b><span>Riverside General · Car park P</span></div></div>
+    <a href="#twin" data-v="twin"><i>3D</i>Digital twin</a>
+    <a href="#reasoning" data-v="reasoning"><i>?-</i>Reasoning bench</a>
+    <a href="#knowledge" data-v="knowledge"><i>KR</i>Knowledge</a>
+    <a href="#scenarios" data-v="scenarios"><i>TC</i>Scenario lab</a>
+    <a href="#project" data-v="project"><i>#</i>Project</a>
+    <div class="rail__foot">
+      <button class="btn" id="themeBtn" type="button">Dark theme</button>
+      <span>CT-351 KRR · Complex Computing Problem</span>
+    </div>
+  </nav>
+
+  <main class="main">
+    <!-- ============ TWIN ============ -->
+    <section class="view" id="v-twin" aria-labelledby="h-twin">
+      <div class="vhead">
+        <div>
+          <p class="eyebrow">Smart parking access &amp; space allocation reasoning system</p>
+          <h1 id="h-twin">Car park P, Tuesday 10 November 2026</h1>
+          <p id="twinLede">Every vehicle is judged at its own arrival time by the rule engine, then sent to the free bay with the shortest walk to the department it is going to.</p>
+        </div>
+        <label class="muted" style="display:grid;gap:4px;font-size:12px">Scenario<select id="scSel"></select></label>
+      </div>
+      <div class="twin">
+        <div>
+          <div class="stage">
+            <div id="twin3d" aria-label="3D cutaway of the four-level hospital car park"></div>
+            <div class="stage__tl"><div class="clock"><b id="clock">06:00</b><span id="clockSub">0 parked · 0 denied</span></div></div>
+            <div class="stage__tr">
+              <button class="btn" id="idsBtn" type="button" aria-pressed="false">Bay numbers</button>
+              <button class="btn" id="explodeBtn" type="button" aria-pressed="false">Compact levels</button>
+              <button class="btn" id="resetCam" type="button">Reset view</button>
+            </div>
+            <div class="levels" id="levelBars" aria-hidden="true"></div>
+          </div>
+          <div class="panel timeline">
+            <div class="tl__row">
+              <button class="btn btn--sign" id="playBtn" type="button">Play the day</button>
+              <button class="btn" id="speedBtn" type="button">Speed ×1</button>
+              <button class="btn" id="endBtn" type="button">Jump to 20:00</button>
+              <span class="muted" style="font-size:12.5px" id="tlHint">Drag the timeline to any minute. Blue bands are visiting hours.</span>
+            </div>
+            <div class="tl__track" id="tlTrack">
+              <div class="tl__axis"></div>
+              <input type="range" id="tlRange" min="360" max="1200" step="1" value="360" aria-label="Time of day">
+            </div>
+          </div>
+        </div>
+        <aside class="side">
+          <div class="panel card" id="vehCard"></div>
+          <div class="panel card">
+            <h3 style="margin-bottom:6px">Gate log</h3>
+            <div class="feed" id="feed"></div>
+          </div>
+          <div class="panel card">
+            <h3 style="margin-bottom:6px">Alerts raised</h3>
+            <div id="alerts" style="display:grid;gap:5px;font-size:13px"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ REASONING ============ -->
+    <section class="view" id="v-reasoning" aria-labelledby="h-reasoning" hidden>
+      <div class="vhead">
+        <div>
+          <p class="eyebrow">Inference</p>
+          <h1 id="h-reasoning">Reasoning bench</h1>
+          <p>Ask a goal and the backward chainer proves it the way the Prolog meta-interpreter does: facts first, then rules in order, negation as failure, builtins once bound. When it fails, the why-not graph walks every rule down to the fact or comparison that breaks.</p>
+        </div>
+      </div>
+      <div class="panel" style="padding:14px 16px">
+        <form class="ask" id="askForm"><input id="askIn" value="admitted(car_bu)" spellcheck="false" autocomplete="off" aria-label="Goal"><button class="btn btn--sign" type="submit">Prove</button></form>
+        <div class="examples" id="examples"></div>
+      </div>
+      <div class="bench" style="margin-top:14px">
+        <div class="panel">
+          <div class="verdict" id="verdict"></div>
+          <div class="graph" id="graph"></div>
+        </div>
+        <div class="panel" style="padding:14px 16px">
+          <h3 style="font-size:18px;margin-bottom:8px">Box-model trace</h3>
+          <pre class="trace" id="trace"></pre>
+        </div>
+      </div>
+      <div class="vhead" style="margin-top:28px">
+        <div>
+          <p class="eyebrow">Forward chaining</p>
+          <h2 style="font-size:28px">Strata × cycles</h2>
+          <p>Rules are evaluated stratum by stratum so negation only looks at finished predicates. Each square is one cycle; its shade is the number of new facts. Click a square to see what fired.</p>
+        </div>
+      </div>
+      <div class="two">
+        <div class="panel" style="padding:14px 16px" id="scGrid"></div>
+        <div class="panel"><div class="verdict" id="fireHead"></div><div class="fires" id="fires"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ KNOWLEDGE ============ -->
+    <section class="view" id="v-knowledge" aria-labelledby="h-knowledge" hidden>
+      <div class="vhead"><div><p class="eyebrow">Knowledge representation</p><h1 id="h-knowledge">What the system knows</h1>
+        <p>Six views of one knowledge base. Frames and the semantic network give structure and inheritance, FOL is the exact specification, the DL ontology is checked for consistency, the Horn rules run, and the script orders a visit into scenes.</p></div></div>
+      <div class="subtabs" role="tablist" id="ktabs">
+        <button role="tab" aria-selected="true" data-k="k-frames">Frames</button>
+        <button role="tab" aria-selected="false" data-k="k-net">Semantic network</button>
+        <button role="tab" aria-selected="false" data-k="k-fol">First-order logic</button>
+        <button role="tab" aria-selected="false" data-k="k-dl">Description logic</button>
+        <button role="tab" aria-selected="false" data-k="k-rules">Horn rules &amp; constraints</button>
+        <button role="tab" aria-selected="false" data-k="k-script">Script</button>
+      </div>
+      <div class="kpane" id="k-frames">
+        <div class="frame-layout">
+          <div class="panel frame-list" id="frameList"></div>
+          <div class="panel" style="padding:14px 16px;min-width:0">
+            <div id="frameHead"></div>
+            <div class="scroll" style="margin-top:10px"><table class="t" id="frameTable"></table></div>
+          </div>
+        </div>
+      </div>
+      <div class="kpane panel net" id="k-net" hidden>
+        <div class="legend" id="netLegend"></div>
+        <svg id="netSvg" role="img" aria-label="Semantic network of the hospital car park"></svg>
+        <p class="muted" id="netOut" style="padding:0 14px 12px;margin:0;font-size:13px">Click a node to light up everything it inherits. Drag nodes to untangle them.</p>
+      </div>
+      <div class="kpane" id="k-fol" hidden><div class="panel scroll" style="max-height:720px"><table class="t" id="folTable"></table></div></div>
+      <div class="kpane" id="k-dl" hidden>
+        <div class="two">
+          <div class="panel axgroup" style="padding:4px 16px 16px" id="tbox"></div>
+          <div class="panel" style="padding:14px 16px">
+            <h3 style="font-size:18px">ABox realisation</h3>
+            <p class="muted" style="font-size:13px;margin:4px 0 10px">Most specific concepts for each individual in the selected scenario, and the consistency check computed by the Prolog reasoner.</p>
+            <div id="dlCons" style="margin-bottom:10px"></div>
+            <div class="scroll" style="max-height:520px"><table class="t" id="abox"></table></div>
+          </div>
+        </div>
+      </div>
+      <div class="kpane" id="k-rules" hidden><div class="panel" style="padding:4px 16px 16px" id="rulesBox"></div></div>
+      <div class="kpane" id="k-script" hidden><div id="scriptBox"></div></div>
+    </section>
+
+    <!-- ============ SCENARIOS ============ -->
+    <section class="view" id="v-scenarios" aria-labelledby="h-sc" hidden>
+      <div class="vhead"><div><p class="eyebrow">Verification</p><h1 id="h-sc">Scenario lab</h1>
+        <p id="scLede">Each scenario changes a few facts and states the outcome a duty manager would expect. The browser engine reruns them all when the page loads; the Prolog engine passed the same cases before this page was built.</p></div></div>
+      <div class="lab">
+        <div class="sc-grid" id="scGridCards"></div>
+        <form class="panel builder" id="builder">
+          <h3 style="font-size:20px">Build your own day</h3>
+          <p class="muted" style="margin:0;font-size:13px">Change facts, then replay. The rule engine and the control layer run live in your browser.</p>
+          <fieldset><legend>Hospital state</legend>
+            <label class="row"><span>Code red (mass casualty)</span><input type="checkbox" id="b-codered"></label>
+            <label class="row"><span>Raining</span><input type="checkbox" id="b-rain"></label>
+          </fieldset>
+          <fieldset><legend>People and records</legend>
+            <label class="row"><span>Waqar's security ban</span><input type="checkbox" id="b-ban" checked></label>
+            <label class="row"><span>Bushra's badge renewed</span><input type="checkbox" id="b-badge"></label>
+            <label class="row"><span>Dr Saad on call</span><input type="checkbox" id="b-oncall" checked></label>
+            <label class="row"><span>Sadia brings children</span><input type="checkbox" id="b-kids" checked></label>
+          </fieldset>
+          <fieldset><legend>Sensors</legend>
+            <label class="row"><span>Saad's battery</span><output id="o-batt">22%</output></label><input type="range" id="b-batt" min="5" max="100" value="22">
+            <label class="row"><span>Yasir's plate read</span><output id="o-anpr">64%</output></label><input type="range" id="b-anpr" min="40" max="100" value="64">
+          </fieldset>
+          <fieldset><legend>Arrival times</legend>
+            <label class="row"><span>Junaid's delivery van</span><output id="o-ju">08:40</output></label><input type="range" id="b-ju" min="420" max="720" step="5" value="520">
+            <label class="row"><span>Tahir (appointment 11:00)</span><output id="o-th">14:00</output></label><input type="range" id="b-th" min="540" max="900" step="5" value="840">
+            <label class="row"><span>Kashif (visitor)</span><output id="o-ks">10:15</output></label><input type="range" id="b-ks" min="480" max="1140" step="5" value="615">
+          </fieldset>
+          <fieldset><legend>Close bays (tap to close)</legend><div class="bays" id="bayBtns"></div></fieldset>
+          <div class="delta" id="delta">No changes from the baseline.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn--sign" type="submit">Replay in the twin</button><button class="btn" type="button" id="bReset">Reset</button></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ PROJECT ============ -->
+    <section class="view" id="v-project" aria-labelledby="h-pr" hidden>
+      <div class="vhead"><div><p class="eyebrow">CT-351 Knowledge Representation &amp; Reasoning · Complex Computing Problem</p><h1 id="h-pr">CarePark-KR in numbers</h1>
+        <p>Counted from the Prolog source by <code>swipl main.pl stats</code>, so the figures always match the knowledge base that runs.</p></div></div>
+      <div class="panel stats" id="statsBox"></div>
+      <div class="two" style="margin-top:14px">
+        <div class="panel card"><h3>Run the Prolog system</h3><pre class="cmd">swipl main.pl                     # menu
+swipl main.pl day                 # replay the day
+swipl main.pl day tc02            # any scenario
+swipl main.pl saturate            # forward trace
+swipl main.pl prove "admitted(wv_no)"
+swipl main.pl whynot "admitted(car_bu)"
+swipl main.pl scenarios           # 22 test cases
+swipl tests/run.pl                # plunit suites</pre></div>
+        <div class="panel card"><h3>How the pieces fit</h3>
+          <ol style="margin:8px 0 0;padding-left:20px;font-size:14px;display:grid;gap:6px">
+            <li>Facts come from the gate camera, occupancy sensors, staff rota, appointments and the security list.</li>
+            <li>Phase 1: stratified forward chaining derives admission, fit, entitlement, priority, cost and fees.</li>
+            <li>The control layer replays the day minute by minute and gives each vehicle one bay.</li>
+            <li>Phase 2: monitoring rules see the allocation and raise alerts, routes and notifications.</li>
+            <li>Offline, FOL model checks and the DL reasoner validate the data and the allocation.</li>
+          </ol></div>
+      </div>
+      <div class="panel card" style="margin-top:14px"><h3>Team</h3>
+        <div class="stats" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:8px">
+          <div class="stat"><b style="font-size:20px">Minhaj Khan · AI-23301</b><span>Knowledge acquisition, frames, script</span></div>
+          <div class="stat"><b style="font-size:20px">Faraz Khan · AI-23047</b><span>Semantic network, DL, expressivity</span></div>
+          <div class="stat"><b style="font-size:20px">Raied Khan · AI-23046</b><span>FOL, Horn rules, forward chaining</span></div>
+          <div class="stat"><b style="font-size:20px">Sabih Salam · AI-23040</b><span>Backward chaining, 3D twin, tests</span></div>
+        </div></div>
+    </section>
+  </main>
+</div>
+
+<script>window.CP_KB = /*KB*/;</script>
+<script>window.CP_RESULTS = /*RESULTS*/;</script>
+<script>window.CP_SITE = /*SITE*/;</script>
+<script>
+/*ENGINE*/
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script>
+/*APP*/
+</script>
+<script type="module">
+/*TWIN*/
+</script>
