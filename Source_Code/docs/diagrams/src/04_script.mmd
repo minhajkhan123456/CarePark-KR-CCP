@@ -1,0 +1,12 @@
+flowchart TB
+  S1["1 Approach · Driver<br/>joins queue at gate G1, arrival time recorded"] --> S2["2 Plate read · ANPR camera<br/>confidence score; under 90% a guard checks (s1, w9)"]
+  S2 --> S3{"3 Emergency check · Gate controller<br/>ambulance on a run or declared emergency? (a5, a6)"}
+  S3 -- yes --> S6
+  S3 -- no --> S4["4 Identification · Gate controller<br/>role, badge, appointment, slot, visit (h1–h10, t1–t4)"]
+  S4 --> S5{"5 Clearance · Security office<br/>badge in date, not banned, slot (s4, s5, a1–a4)"}
+  S5 -- fails --> X["Barrier stays shut<br/>first failing reason shown"]
+  S5 -- clears --> S6["6 Entry · Barrier opens (a7)"]
+  S6 --> S7["7 Bay choice · Allocation engine<br/>fit, entitlement, cost, priority (f1, e1–e15, c1, k9)"]
+  S7 --> S8["8 Guidance · Display board<br/>bay and route; ward or trauma team notified (w11–w13)"]
+  S8 --> S9["9 Parking · Occupancy sensor<br/>status := occupied (w2)"]
+  S9 --> S10["10 Stay and exit · Monitoring<br/>drop-off limit, charger use, blocked bays, fee (w3, w5, w8, m1–m7)"]

@@ -1,0 +1,82 @@
+
+==============================================================================
+Baseline day
+==============================================================================
+431 facts in, 808 derived in phase 1 (decisions), 49 in phase 2 (monitoring)
+
+Timeline
+  06:40  mc_ma parks in mc1 (cost 170 m)
+  07:05  ev_sa parks in ev1 (cost 150 m)
+  07:45  car_im parks in pt1 (cost 40 m)
+  07:50  suv_ar parks in st3 (cost 70 m)
+  08:40  van_ju parks in ld1 (cost 30 m)
+  09:00  amb_fa parks in amb1 (cost 10 m)
+  09:20  van_ju leaves ld1
+  09:20  car_bu denied: badge_invalid
+  09:30  amb_fa leaves amb1
+  09:45  wv_no parks in ac1 (cost 140 m)
+  10:15  car_ks parks in dr1 (cost 460 m)
+  10:35  car_ks leaves dr1
+  11:30  car_sd parks in fm1 (cost 85 m)
+  11:40  car_ru parks in mt1 (cost 35 m)
+  11:45  car_im leaves pt1
+  11:45  car_wq denied: security_ban
+  12:00  ev_zb leaves ev2
+  12:40  car_gh parks in dr1 (cost 20 m)
+  12:45  wv_no leaves ac1
+  13:00  car_sd leaves fm1
+  13:05  car_gh leaves dr1
+  14:00  car_th parks in dr1 (cost 420 m)
+  15:00  car_th leaves dr1
+  15:00  car_hm leaves st1
+  15:00  car_lb leaves st2
+  15:05  car_ya denied: plate_unreadable
+  15:20  mc_ma leaves mc1
+  15:40  car_ru leaves mt1
+  17:05  ev_sa leaves ev1
+  19:30  suv_ar leaves st3
+
+Decisions
+  06:40  mc_ma        bay mc1, cost 170 m, priority 3, waited 0 min
+  07:05  ev_sa        bay ev1, cost 150 m, priority 1, waited 0 min
+  07:45  car_im       bay pt1, cost 40 m, priority 2, waited 0 min
+  07:50  suv_ar       bay st3, cost 70 m, priority 3, waited 0 min
+  08:40  van_ju       bay ld1, cost 30 m, priority 3, waited 0 min
+  09:00  amb_fa       bay amb1, cost 10 m, priority 0, waited 0 min
+  09:20  car_bu       DENIED (badge_invalid)
+  09:45  wv_no        bay ac1, cost 140 m, priority 2, waited 0 min
+  10:15  car_ks       bay dr1, cost 460 m, priority 4, waited 0 min
+  11:30  car_sd       bay fm1, cost 85 m, priority 4, waited 0 min
+  11:40  car_ru       bay mt1, cost 35 m, priority 2, waited 0 min
+  11:45  car_wq       DENIED (security_ban)
+  12:40  car_gh       bay dr1, cost 20 m, priority 0, waited 0 min
+  14:00  car_th       bay dr1, cost 420 m, priority 5, waited 0 min
+  15:05  car_ya       DENIED (plate_unreadable)
+
+Alerts and guidance (phase 2)
+  charger_hog(ev_zb,ev2)
+  dropoff_overstay(car_ks)
+  dropoff_overstay(car_th)
+  manual_check(car_ya)
+  security_alert(waqar)
+  notify_ward(car_ru,maternity)
+  alert_trauma_team(car_gh)
+  height_warning(van_ju)
+  height_warning(amb_fa)
+  height_warning(wv_no)
+
+Fees (PKR)
+  amb_fa    0
+  car_gh    0
+  ev_sa     0
+  mc_ma     0
+  suv_ar    0
+  van_ju    0
+  car_th    0
+  car_im    100
+  wv_no     50
+  car_ks    100
+  car_sd    150
+  car_ru    250
+
+Integrity constraints IC1-IC13: []

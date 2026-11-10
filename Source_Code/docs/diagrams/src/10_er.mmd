@@ -1,0 +1,11 @@
+erDiagram
+  PERSON ||--o{ VEHICLE : drives
+  PERSON }o--|| DEPARTMENT : "going to"
+  PERSON ||--o| SHIFT : works
+  PERSON ||--o{ APPOINTMENT : has
+  VEHICLE ||--o| BAY : "assigned to"
+  BAY }o--|| ZONE : "part of"
+  ZONE }o--|| LEVEL : "part of"
+  ZONE ||--o{ WALK : "distance to"
+  DEPARTMENT ||--o{ WALK : ""
+  LEVEL ||--|| ROUTE : "clearance"

@@ -1,0 +1,74 @@
+
+==============================================================================
+Why not: admitted(car_bu)
+==============================================================================
+ admitted(car_bu) cannot be proved:
+   a5 blocked at emergency_vehicle(car_bu)
+     emergency_vehicle(car_bu) cannot be proved:
+       h17 blocked at vclass(car_bu,ambulance)
+         vclass(car_bu,ambulance)   <- no such fact is stored
+   a6 blocked at emergency_declared(car_bu)
+     emergency_declared(car_bu)   <- no such fact is stored
+   a7 blocked at cleared(bushra)
+     cleared(bushra) cannot be proved:
+       a1 blocked at badge_valid(bushra)
+         badge_valid(bushra) cannot be proved:
+           s4 blocked at ge(20261031,20261110)
+             ge(20261031,20261110)   <- comparison is false
+       a2 blocked at patient(bushra)
+         patient(bushra)   <- no such fact is stored
+       a3 blocked at visitor(bushra)
+         visitor(bushra)   <- no such fact is stored
+       a4 blocked at supplier(bushra)
+         supplier(bushra)   <- no such fact is stored
+
+==============================================================================
+Why not: admitted(car_wq)
+==============================================================================
+ admitted(car_wq) cannot be proved:
+   a5 blocked at emergency_vehicle(car_wq)
+     emergency_vehicle(car_wq) cannot be proved:
+       h17 blocked at vclass(car_wq,ambulance)
+         vclass(car_wq,ambulance)   <- no such fact is stored
+   a6 blocked at emergency_declared(car_wq)
+     emergency_declared(car_wq)   <- no such fact is stored
+   a7 blocked at cleared(waqar)
+     cleared(waqar) cannot be proved:
+       a1 blocked at staff_member(waqar)
+         staff_member(waqar) cannot be proved:
+           h1 blocked at doctor(waqar)
+             doctor(waqar)   <- no such fact is stored
+           h2 blocked at nurse(waqar)
+             nurse(waqar)   <- no such fact is stored
+           h3 blocked at admin(waqar)
+             admin(waqar)   <- no such fact is stored
+           h4 blocked at paramedic(waqar)
+             paramedic(waqar)   <- no such fact is stored
+       a2 blocked at patient(waqar)
+         patient(waqar)   <- no such fact is stored
+       a3 blocked at not banned(waqar)
+         banned(waqar) holds, so its negation fails
+       a4 blocked at supplier(waqar)
+         supplier(waqar)   <- no such fact is stored
+
+==============================================================================
+Why not: admitted(car_ya)
+==============================================================================
+ admitted(car_ya) cannot be proved:
+   a5 blocked at emergency_vehicle(car_ya)
+     emergency_vehicle(car_ya) cannot be proved:
+       h17 blocked at vclass(car_ya,ambulance)
+         vclass(car_ya,ambulance)   <- no such fact is stored
+   a6 blocked at emergency_declared(car_ya)
+     emergency_declared(car_ya)   <- no such fact is stored
+   a7 blocked at identified(car_ya)
+     identified(car_ya) cannot be proved:
+       s1 blocked at ge(64,90)
+         ge(64,90)   <- comparison is false
+
+==============================================================================
+Why not: fits(wv_no, pt1)
+==============================================================================
+ fits(wv_no,pt1) cannot be proved:
+   f1 blocked at le(230,210)
+     le(230,210)   <- comparison is false

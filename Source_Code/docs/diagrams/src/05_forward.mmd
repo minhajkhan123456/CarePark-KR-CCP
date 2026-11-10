@@ -1,0 +1,14 @@
+flowchart TB
+  WM0["Working memory<br/>431 base facts"] --> P1S0
+  subgraph P1["Phase 1 · decision rules"]
+    P1S0["Stratum 0<br/>taxonomy, sensing, time (h,s,t)<br/>cycles 1–2"] --> P1S1["Stratum 1<br/>clearance, fit, entitlement, priority, cost<br/>cycles 3–7"]
+    P1S1 --> P1S2["Stratum 2<br/>rules using NAF over stratum 1<br/>cycles 8–9"]
+  end
+  P1S2 --> CL["Control layer<br/>replay day: departures → priority → arrival<br/>cheapest free bay, waiting queue"]
+  CL --> AS["assigned(V,B) facts"]
+  AS --> P2S0
+  subgraph P2["Phase 2 · monitoring rules (w*)"]
+    P2S0["Stratum 0<br/>occupant, blocked, overstay<br/>cycles 10–11"] --> P2S1["Stratum 1<br/>tow, notify, alerts<br/>cycles 12–13"]
+  end
+  P2S1 --> FP["Fixed point<br/>1300 facts · 857 derived"]
+  FP --> IC["13 integrity constraints checked"]

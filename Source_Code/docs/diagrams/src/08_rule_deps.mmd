@@ -1,0 +1,14 @@
+flowchart LR
+  facts[(base facts)] --> H["h1–h18 taxonomy"]
+  facts --> S["s1–s7 sensing"]
+  facts --> T["t1–t4 time windows"]
+  H & S & T --> A["a1–a7 cleared / admitted"]
+  facts --> Fi["f1–f3 fits, bay usable"]
+  H & S --> E["e1–e15 entitled zones"]
+  A & Fi & E --> C["c1 candidate"]
+  H & S --> P["p1–p10 priority"]
+  C --> K["k1–k11 cost"]
+  H --> M["m1–m7 fees"]
+  C & K & P --> CTRL{{control layer}}
+  CTRL --> W["w1–w14 monitoring"]
+  W --> AL["alerts · tow · notify"]

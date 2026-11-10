@@ -1,0 +1,32 @@
+
+==============================================================================
+CarePark-KR in numbers
+==============================================================================
+  Ground facts                              431
+  Horn rules                                97
+  Phase-1 rules (decision)                  83
+  Phase-2 rules (monitoring)                14
+  Integrity constraints                     13
+  Negation strata                           3
+  Derived facts (both phases)               857
+  Inference cycles, phase 1                 9
+  Inference cycles, both phases             13
+  Working memory at the fixed point         1300
+  Drivers arriving                          15
+  Vehicles parked overnight                 3
+  Bays                                      29
+  Zones                                     13
+  Levels                                    4
+  Departments                               8
+  Vehicles parked (baseline day)            12
+  Vehicles denied (baseline day)            3
+  Test scenarios                            22
+  Class frames                              30
+  Instance frames                           16
+  Script scenes                             10
+  Semantic network nodes                    61
+  Semantic network links                    79
+  FOL statements                            36
+  FOL statements beyond Horn                21
+  DL TBox axioms                            89
+  Inferred subsumptions                     15

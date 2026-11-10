@@ -1,0 +1,20 @@
+sequenceDiagram
+  participant G as Gate G1 (ANPR)
+  participant FC as Forward chainer
+  participant CL as Control layer
+  participant B as Bays
+  participant MN as Monitor (phase 2)
+  G->>FC: arrival(V,T), anpr(V,P)
+  FC->>FC: saturate phase 1 (strata 0–2)
+  FC->>CL: admitted, candidate, cost, priority
+  loop each minute event
+    CL->>B: release departures first
+    CL->>CL: order arrivals by priority 0–5, then time
+    CL->>B: cheapest free candidate bay (cost, then id)
+    alt no free bay
+      CL->>CL: put in waiting queue, retry on next departure
+    end
+  end
+  CL->>MN: assigned(V,B)
+  MN->>MN: saturate phase 2 rules w1–w14
+  MN-->>G: alerts, tow requests, ward notices

@@ -1,0 +1,226 @@
+
+==============================================================================
+Horn rules
+==============================================================================
+  h1  [s0] staff_member(P) :- doctor(P).
+        % Doctors are staff
+  h2  [s0] staff_member(P) :- nurse(P).
+        % Nurses are staff
+  h3  [s0] staff_member(P) :- admin(P).
+        % Admin officers are staff
+  h4  [s0] staff_member(P) :- paramedic(P).
+        % Paramedics are staff
+  h5  [s0] clinician(P) :- doctor(P).
+        % Doctors are clinicians
+  h6  [s0] clinician(P) :- nurse(P).
+        % Nurses are clinicians
+  h7  [s0] person(P) :- staff_member(P).
+        % Staff are persons
+  h8  [s0] person(P) :- patient(P).
+        % Patients are persons
+  h9  [s0] person(P) :- visitor(P).
+        % Visitors are persons
+  h10 [s0] person(P) :- supplier(P).
+        % Suppliers are persons
+  h11 [s0] vehicle(V) :- vclass(V,_).
+        % Anything with a class is a vehicle
+  h12 [s0] ev(V) :- vclass(V,ev).
+        % Class ev is an EV
+  h13 [s0] motorcycle(V) :- vclass(V,motorcycle).
+        % Class motorcycle is a motorcycle
+  h14 [s0] car_like(V) :- vclass(V,car).
+        % Cars are car-like
+  h15 [s0] car_like(V) :- vclass(V,suv).
+        % SUVs are car-like
+  h16 [s0] car_like(V) :- ev(V).
+        % EVs are car-like
+  h17 [s0] emergency_vehicle(V) :- vclass(V,ambulance), emergency_run(V).
+        % An ambulance on a run is an emergency vehicle
+  h18 [s1] unregistered(V) :- vehicle(V), not registered(V).
+        % A vehicle with no registration is unregistered (NAF)
+  s1  [s0] identified(V) :- anpr(V,C), ge(C,90).
+        % Plate read at 90% or more identifies the vehicle
+  s2  [s0] battery_low(V) :- ev(V), battery(V,L), lt(L,30).
+        % EV battery under 30% is low
+  s3  [s0] charger_bay(B) :- bay_type(B,ev).
+        % EV bays have chargers
+  s4  [s0] badge_valid(P) :- staff_badge(P,I,E), today(T), le(I,T), ge(E,T).
+        % Staff badge is valid today
+  s5  [s0] banned(P) :- security_ban(P).
+        % A security ban bans the person
+  s6  [s0] code_red :- mode(code_red).
+        % Code red mode is on
+  s7  [s0] raining :- weather(rain).
+        % It is raining
+  t1  [s0] on_shift(P) :- shift(P,S,E), drives(P,V), arrival(V,T), sub(S,30,S0), ge(T,S0), le(T,E).
+        % On shift: from 30 min before start to shift end
+  t2  [s0] in_appointment_window(P) :- appointment(P,_,T0), drives(P,V), arrival(V,T), sub(T0,60,A), add(T0,30,B), ge(T,A), le(T,B).
+        % Appointment window: 60 min before to 30 min after
+  t3  [s0] visiting_time(V) :- arrival(V,T), visiting_window(A,B), ge(T,A), lt(T,B).
+        % Arrival inside a visiting window
+  t4  [s0] delivery_window(P) :- delivery_slot(P,A,B), drives(P,V), arrival(V,T), ge(T,A), le(T,B).
+        % Arrival inside the delivery slot
+  a1  [s1] cleared(P) :- staff_member(P), badge_valid(P), not banned(P).
+        % Staff with a valid badge, not banned, are cleared
+  a2  [s1] cleared(P) :- patient(P), not banned(P).
+        % Patients not banned are cleared
+  a3  [s1] cleared(P) :- visitor(P), not banned(P).
+        % Visitors not banned are cleared
+  a4  [s1] cleared(P) :- supplier(P), delivery_window(P), not banned(P).
+        % Suppliers inside their slot are cleared
+  a5  [s1] admitted(V) :- emergency_vehicle(V).
+        % Emergency vehicles are always admitted
+  a6  [s1] admitted(V) :- emergency_declared(V), arrival(V,_).
+        % A declared emergency is admitted
+  a7  [s1] admitted(V) :- arrival(V,_), identified(V), drives(P,V), cleared(P).
+        % Identified vehicle with a cleared driver is admitted
+  f1  [s0] fits(V,B) :- vclass(V,C), bay_type(B,T), class_fits(C,T), height(V,H), bay_zone(B,Z), zone_level(Z,L), route_clearance(L,Cl), le(H,Cl).
+        % Class fits bay type and height fits route clearance
+  f2  [s0] too_tall(V,L) :- height(V,H), route_clearance(L,Cl), gt(H,Cl).
+        % Vehicle too tall for a level
+  f3  [s1] bay_usable(B) :- bay_type(B,_), not out_of_service(B).
+        % Bay not out of service is usable
+  e1  [s1] entitled(V,Z) :- emergency_vehicle(V), zone_kind(Z,ambulance).
+        % Ambulance zone for emergency vehicles
+  e2  [s1] entitled(V,Z) :- admitted(V), zone_kind(Z,dropoff).
+        % Drop-off zone for anyone admitted
+  e3  [s1] entitled(V,Z) :- drives(P,V), disability_badge(P), admitted(V), zone_kind(Z,accessible).
+        % Accessible zone for badge holders
+  e4  [s1] entitled(V,Z) :- drives(P,V), delivery_window(P), admitted(V), zone_kind(Z,loading).
+        % Loading dock inside the delivery slot
+  e5  [s1] entitled(V,Z) :- ev(V), admitted(V), zone_kind(Z,ev_charging).
+        % EV zone for EVs
+  e6  [s1] entitled(V,Z) :- motorcycle(V), admitted(V), zone_kind(Z,moto).
+        % Motorcycle zone for motorcycles
+  e7  [s1] entitled(V,Z) :- drives(P,V), on_call(P), on_shift(P), admitted(V), zone_kind(Z,oncall).
+        % On-call zone for on-call doctors on shift
+  e8  [s1] entitled(V,Z) :- drives(P,V), staff_member(P), on_shift(P), admitted(V), zone_kind(Z,staff).
+        % Staff zone for staff on shift
+  e9  [s1] entitled(V,Z) :- drives(P,V), in_appointment_window(P), admitted(V), zone_kind(Z,patient).
+        % Patient zone inside the appointment window
+  e10 [s1] entitled(V,Z) :- drives(P,V), expectant(P), admitted(V), zone_kind(Z,maternity).
+        % Maternity bay for expectant mothers
+  e11 [s1] entitled(V,Z) :- drives(P,V), visitor(P), visiting_time(V), admitted(V), not code_red, zone_kind(Z,visitor).
+        % Visitor zone in visiting hours, unless code red
+  e12 [s1] entitled(V,Z) :- drives(P,V), has_children(P), visiting_time(V), admitted(V), not code_red, zone_kind(Z,family).
+        % Family bay for visitors with children, unless code red
+  e13 [s1] entitled(V,Z) :- drives(P,V), staff_member(P), on_shift(P), admitted(V), code_red, zone_kind(Z,visitor).
+        % Code red gives the visitor zone to staff
+  e14 [s1] entitled(V,Z) :- drives(P,V), staff_member(P), on_shift(P), admitted(V), zone_kind(Z,overflow).
+        % Roof overflow for staff on shift
+  e15 [s1] entitled(V,Z) :- drives(P,V), visitor(P), visiting_time(V), admitted(V), not code_red, zone_kind(Z,overflow).
+        % Roof overflow for visitors in visiting hours
+  c1  [s1] candidate(V,B) :- admitted(V), fits(V,B), bay_zone(B,Z), entitled(V,Z), bay_usable(B).
+        % Candidate: admitted, fits, entitled, usable
+  p1  [s1] priority(V,0) :- emergency_vehicle(V).
+        % Priority 0: ambulance
+  p2  [s1] priority(V,0) :- emergency_declared(V), admitted(V).
+        % Priority 0: declared emergency
+  p3  [s1] priority(V,1) :- drives(P,V), on_call(P), on_shift(P), admitted(V).
+        % Priority 1: on-call doctor
+  p4  [s1] priority(V,2) :- drives(P,V), disability_badge(P), admitted(V).
+        % Priority 2: disability badge
+  p5  [s1] priority(V,2) :- drives(P,V), expectant(P), admitted(V).
+        % Priority 2: expectant mother
+  p6  [s1] priority(V,2) :- drives(P,V), in_appointment_window(P), admitted(V).
+        % Priority 2: patient on time
+  p7  [s1] priority(V,3) :- drives(P,V), staff_member(P), on_shift(P), admitted(V).
+        % Priority 3: staff on shift
+  p8  [s1] priority(V,3) :- drives(P,V), delivery_window(P), admitted(V).
+        % Priority 3: delivery in slot
+  p9  [s1] priority(V,4) :- drives(P,V), visitor(P), admitted(V).
+        % Priority 4: visitor
+  p10 [s1] priority(V,5) :- admitted(V).
+        % Priority 5: anyone admitted
+  k1  [s1] adjusted(V,B) :- candidate(V,B), battery_low(V), not charger_bay(B).
+        % Low-battery EV off a charger needs an adjustment
+  k2  [s1] adjusted(V,B) :- candidate(V,B), ev(V), not battery_low(V), charger_bay(B).
+        % Charged EV on a charger needs an adjustment
+  k3  [s2] ev_adjust(V,B,120) :- candidate(V,B), battery_low(V), not charger_bay(B).
+        % +120 m: low battery but no charger
+  k4  [s2] ev_adjust(V,B,40) :- candidate(V,B), ev(V), not battery_low(V), charger_bay(B).
+        % +40 m: charger taken by an EV that does not need it
+  k5  [s2] ev_adjust(V,B,0) :- candidate(V,B), not adjusted(V,B).
+        % +0 m otherwise (NAF)
+  k6  [s1] zone_cost(K,P) :- kind_penalty(K,P), not raining.
+        % Zone penalty when dry
+  k7  [s1] zone_cost(K,P) :- kind_penalty(K,P0), raining, neq(K,overflow), eq(P0,P).
+        % Zone penalty in rain, covered zones
+  k8  [s1] zone_cost(overflow,P) :- kind_penalty(overflow,P0), raining, add(P0,300,P).
+        % Roof penalty +300 m in rain
+  k9  [s2] cost(V,B,C) :- candidate(V,B), bay_zone(B,Z), drives(P,V), destination(P,D), walk(Z,D,W), zone_kind(Z,K), zone_cost(K,Pen), ev_adjust(V,B,A), add(W,Pen,C1), add(C1,A,C).
+        % Cost = walk to destination + zone penalty + EV adjustment
+  k10 [s2] cost(V,B,C) :- candidate(V,B), emergency_vehicle(V), bay_zone(B,Z), walk(Z,emergency,W), zone_kind(Z,K), zone_cost(K,Pen), add(W,Pen,C).
+        % Ambulance cost = walk to emergency + penalty
+  k11 [s2] cost(V,B,C) :- candidate(V,B), emergency_declared(V), bay_zone(B,Z), walk(Z,emergency,C).
+        % Declared emergency cost = walk to emergency
+  m1  [s1] fee(V,0) :- drives(P,V), staff_member(P), on_shift(P), admitted(V).
+        % Free for staff on shift
+  m2  [s1] fee(V,0) :- emergency_vehicle(V).
+        % Free for ambulances
+  m3  [s1] fee(V,0) :- emergency_declared(V), admitted(V).
+        % Free for emergencies
+  m4  [s1] fee(V,0) :- drives(P,V), supplier(P), admitted(V).
+        % Free for contracted suppliers
+  m5  [s1] fee(V,0) :- drives(P,V), patient(P), admitted(V), stay(V,M), le(M,120).
+        % Patients: first 2 h free
+  m6  [s1] fee(V,F) :- drives(P,V), patient(P), admitted(V), stay(V,M), gt(M,120), sub(M,120,X), cdiv(X,60,H), mul(H,50,F).
+        % Patients: PKR 50 per started hour after 2 h
+  m7  [s1] fee(V,F) :- drives(P,V), visitor(P), admitted(V), not emergency_declared(V), stay(V,M), cdiv(M,60,H), sub(H,1,H1), mul(H1,50,X), add(100,X,F).
+        % Visitors: PKR 100 first hour, PKR 50 per extra hour
+  w1  [s0] occupant(V,B) :- occupies(V,B).
+        % Pre-parked vehicles occupy bays
+  w2  [s0] occupant(V,B) :- assigned(V,B).
+        % Assigned vehicles occupy bays
+  w3  [s1] ambulance_bay_blocked(B) :- occupant(V,B), bay_type(B,amb), not emergency_vehicle(V).
+        % Ambulance bay held by a non-ambulance is blocked
+  w4  [s1] tow_request(B) :- ambulance_bay_blocked(B), occupant(V,B), unregistered(V).
+        % Tow an unregistered car blocking an ambulance bay
+  w5  [s0] charger_hog(V,B) :- occupant(V,B), bay_type(B,ev), battery(V,L), ge(L,95).
+        % A full EV on a charger is hogging it
+  w6  [s1] dropoff_limit(V,30) :- emergency_declared(V).
+        % Drop-off limit 30 min for emergencies
+  w7  [s1] dropoff_limit(V,15) :- assigned(V,_), not emergency_declared(V).
+        % Drop-off limit 15 min otherwise
+  w8  [s1] dropoff_overstay(V) :- assigned(V,B), bay_type(B,drop), stay(V,M), dropoff_limit(V,L), gt(M,L).
+        % Planned stay longer than the drop-off limit
+  w9  [s1] manual_check(V) :- arrival(V,_), anpr(V,C), lt(C,90), not emergency_vehicle(V).
+        % Plate read below 90%: manual check
+  w10 [s0] security_alert(P) :- banned(P), drives(P,V), arrival(V,_).
+        % Banned person at the gate: alert security
+  w11 [s0] notify_ward(V,D) :- assigned(V,_), drives(P,V), expectant(P), destination(P,D).
+        % Tell the ward an expectant mother has arrived
+  w12 [s0] route(V,B,R) :- assigned(V,B), bay_zone(B,Z), zone_level(Z,L), level_route(L,R).
+        % Route shown on the display board
+  w13 [s0] alert_trauma_team(V) :- assigned(V,_), emergency_declared(V).
+        % Declared emergency: alert the trauma team
+  w14 [s0] height_warning(V) :- arrival(V,_), too_tall(V,l1).
+        % Warn when a vehicle cannot reach upper levels
+
+Integrity constraints
+  ic1 :- alloc(V1,B,F1,T1), alloc(V2,B,F2,T2), V1 \= V2, F1 < T2, F2 < T1.
+      one bay, two vehicles at the same time
+  ic2 :- alloc(V,B1,_,_), alloc(V,B2,_,_), B1 \= B2.
+      one vehicle, two bays at the same time
+  ic3 :- alloc(V,B,_,_), height(V,H), bay_zone(B,Z), zone_level(Z,L), route_clearance(L,C), H > C.
+      vehicle taller than its route clearance
+  ic4 :- alloc(V,B,_,_), vclass(V,C), bay_type(B,T), not class_fits(C,T).
+      vehicle class cannot use the bay type
+  ic5 :- drives(P1,V), drives(P2,V), P1 \= P2.
+      vehicle driven by two people
+  ic6 :- vclass(V,C1), vclass(V,C2), C1 \= C2.
+      vehicle with two classes
+  ic7 :- bay_zone(B,Z1), bay_zone(B,Z2), Z1 \= Z2.
+      bay in two zones
+  ic8 :- shift(P,S,E), E =< S.
+      shift ends before it starts
+  ic9 :- staff_badge(P,I,E), E < I.
+      badge expires before it is issued
+  ic10 :- appointment(P,_,_), not patient(P).
+      appointment for someone who is not a patient
+  ic11 :- vclass(V,ambulance), drives(P,V), not paramedic(P).
+      ambulance not driven by a paramedic
+  ic12 :- occupies(V,B), out_of_service(B).
+      vehicle parked in a bay that is out of service
+  ic13 :- staff_member(P), visitor(P).
+      staff role and visitor role on one person

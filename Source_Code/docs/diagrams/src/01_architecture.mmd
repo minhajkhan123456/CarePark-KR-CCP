@@ -1,0 +1,29 @@
+flowchart LR
+  subgraph KB["Knowledge base (kb/)"]
+    F["facts.pl<br/>431 ground facts"]
+    R["rules.pl<br/>97 Horn rules as data r(Id,Head,Body)<br/>13 integrity constraints"]
+    S["scenarios.pl<br/>22 test cases (deltas)"]
+  end
+  subgraph EN["Reasoning engine (engine/)"]
+    C["core.pl<br/>stratified forward chaining + NAF"]
+    A["allocate.pl<br/>day replay control layer"]
+    B["backward.pl<br/>meta-interpreter, box trace, why-not"]
+    K["check.pl<br/>integrity constraints, expected outcomes"]
+  end
+  subgraph KR["Other KR views"]
+    FR["frames.pl<br/>30 class + 16 instance frames, demons, script"]
+    SN["semnet.pl<br/>61 nodes, 79 links"]
+    FO["fol.pl<br/>36 FOL statements"]
+    DL["dl.pl<br/>89 TBox/ABox axioms"]
+  end
+  F --> C
+  R --> C
+  S --> C
+  C --> A --> K
+  F --> B
+  R --> B
+  M["main.pl CLI"] --> A & B & FR & SN & FO & DL
+  X["tools/export.pl"] --> J["kb.json · results.json · site.json"]
+  J --> W["website: engine.js (JS port) + three.js digital twin"]
+  T1["tests/ plunit 157"] -.-> EN
+  T2["tests_js/ node:test 71"] -.-> W

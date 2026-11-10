@@ -1,0 +1,99 @@
+
+==============================================================================
+First-order logic
+==============================================================================
+  f1  ∀x (Doctor(x) ∨ Nurse(x) ∨ Admin(x) ∨ Paramedic(x) → Staff(x))
+        Doctors, nurses, admin officers and paramedics are staff  [h1-h4, horn]
+  f2  ∀x (Staff(x) ∨ Patient(x) ∨ Visitor(x) ∨ Supplier(x) → Person(x))
+        Staff, patients, visitors and suppliers are persons  [h7-h10, horn]
+  f3  ∀x (Person(x) → Staff(x) ∨ Patient(x) ∨ Visitor(x) ∨ Supplier(x))
+        Every person has at least one role  [model check, not_horn]
+  f4  ∀v (Vehicle(v) → ∃!c Class(v,c))
+        Every vehicle has exactly one class  [IC6, not_horn]
+  f5  ∀v (Arrives(v) → ∃d (Drives(d,v) ∧ ∀d′ (Drives(d′,v) → d′ = d)))
+        Every vehicle at the gate has exactly one driver  [IC5, not_horn]
+  f6  ∀v (Identified(v) ↔ ∃c (Anpr(v,c) ∧ c ≥ 90))
+        Identified iff the plate read is at least 90%  [s1, horn]
+  f7  ∀p (BadgeValid(p) ↔ ∃i ∃e ∃t (Badge(p,i,e) ∧ Today(t) ∧ i ≤ t ≤ e))
+        A badge is valid iff today lies between issue and expiry  [s4, horn]
+  f8  ∀p (OnShift(p) ↔ ∃s ∃e ∃v ∃t (Shift(p,s,e) ∧ Drives(p,v) ∧ Arrival(v,t) ∧ s − 30 ≤ t ≤ e))
+        On shift from 30 minutes before the start to the end  [t1, horn]
+  f9  ∀p (InWindow(p) ↔ ∃d ∃a ∃v ∃t (Appt(p,d,a) ∧ Drives(p,v) ∧ Arrival(v,t) ∧ a − 60 ≤ t ≤ a + 30))
+        Appointment window is −60 to +30 minutes  [t2, horn]
+  f10 ∀v (VisitingTime(v) ↔ ∃t ∃a ∃b (Arrival(v,t) ∧ Window(a,b) ∧ a ≤ t < b))
+        Visiting time is inside a visiting window  [t3, horn]
+  f11 ∀p (Banned(p) → ¬Cleared(p))
+        A banned person is never cleared  [a1-a4 with NAF, not_horn]
+  f12 ∀p (Staff(p) ∧ BadgeValid(p) ∧ ¬Banned(p) → Cleared(p))
+        Clearance by role  [a1-a4, horn]
+  f13 ∀v (EmergencyVehicle(v) ∨ DeclaredEmergency(v) → Admitted(v))
+        Emergencies are always admitted  [a5, a6, horn]
+  f14 ∀v (∃p (Arrival(v) ∧ Identified(v) ∧ Drives(p,v) ∧ Cleared(p)) → Admitted(v))
+        Admission of identified, cleared drivers  [a7, horn]
+  f15 ∀v (Admitted(v) → ∃t Arrival(v,t))
+        Every admitted vehicle came through the gate  [model check, not_horn]
+  f16 ∀v ∀b (Fits(v,b) ↔ ∃c ∃t ∃h ∃l ∃k (Class(v,c) ∧ Type(b,t) ∧ ClassFits(c,t) ∧ Height(v,h) ∧ LevelOf(b,l) ∧ Clear(l,k) ∧ h ≤ k))
+        Fit: class compatible and height under route clearance  [f1, horn]
+  f17 ∀v ∀b (Alloc(v,b) ∧ Height(v,h) ∧ h > 210 → LevelOf(b,g))
+        Nothing taller than 210 cm is placed above ground  [IC3, not_horn]
+  f18 ∀v ∀z (Entitled(v,z) ← … one clause per zone kind, e1-e15)
+        Entitlement by zone kind  [e1-e15, horn]
+  f19 ∀v ∀z (CodeRed ∧ Visitor(v) ∧ Kind(z,visitor) → ¬Entitled(v,z))
+        In code red no visitor is entitled to the visitor zone  [e11 with NAF, not_horn]
+  f20 ∀v ∀b (Candidate(v,b) ↔ Admitted(v) ∧ Fits(v,b) ∧ ∃z (InZone(b,z) ∧ Entitled(v,z)) ∧ Usable(b))
+        A candidate bay fits, is entitled and usable  [c1, horn]
+  f21 ∀v ∀b (Alloc(v,b) → Candidate(v,b))
+        Every allocated bay was a candidate  [model check, not_horn]
+  f22 ∀v (Admitted(v) ∧ ∃b FreeCandidate(v,b) → ∃!b Alloc(v,b))
+        Each admitted vehicle with a free candidate gets exactly one bay  [control layer, not_horn]
+  f23 ∀b ∀v₁ ∀v₂ (Alloc(v₁,b,[s₁,e₁]) ∧ Alloc(v₂,b,[s₂,e₂]) ∧ v₁ ≠ v₂ → e₁ ≤ s₂ ∨ e₂ ≤ s₁)
+        No bay holds two vehicles at the same time  [IC1, not_horn]
+  f24 ∀v ∀b (Alloc(v,b,t) → ¬∃b′ (Free(b′,t) ∧ Cost(v,b′) < Cost(v,b)))
+        The chosen bay has minimum cost among bays free at that moment  [control layer, not_horn]
+  f25 ∀v₁ ∀v₂ (Arr(v₁)=Arr(v₂) ∧ Pri(v₁) < Pri(v₂) → Served(v₁) < Served(v₂))
+        Higher priority is served first at the same minute  [control layer, not_horn]
+  f26 ∀v ∀b (Occupies(v,b) ∧ Type(b,amb) → EmergencyVehicle(v))
+        Ambulance bays are for emergency vehicles only  [w3 alert, not_horn]
+  f27 ∀v ∀b (Alloc(v,b) ∧ Type(b,acc) → ∃p (Drives(p,v) ∧ Badge(p)))
+        Accessible bays are allocated only to badge holders  [e3, not_horn]
+  f28 ∀b (Bay(b) → ∃!z InZone(b,z))
+        Every bay lies in exactly one zone  [IC7, not_horn]
+  f29 ∀z (Zone(z) → ∃!l Level(z,l))
+        Every zone is on exactly one level  [model check, not_horn]
+  f30 ∀v (Alloc(v,b) ∧ Type(b,drop) ∧ Stay(v,s) ∧ s > Limit(v) → Overstay(v))
+        Drop-off stays are short  [w6-w8, horn]
+  f31 ∀v (Patient(v) ∧ Stay(v,s) ∧ s > 120 → Fee(v, 50·⌈(s−120)/60⌉))
+        Fee schedule  [m1-m7, horn]
+  f32 ∀v (Alloc(v,b) → ∃f Fee(v,f))
+        Every admitted vehicle has a fee or is exempt  [model check, not_horn]
+  f33 ∀p ∀s ∀e (Shift(p,s,e) → s < e)
+        Shifts end after they start  [IC8, not_horn]
+  f34 ∀p (∃d ∃t Appt(p,d,t) → Patient(p))
+        Only patients hold appointments  [IC10, not_horn]
+  f35 ∀x ¬(Staff(x) ∧ Visitor(x))
+        Nobody is both staff and a visitor  [IC13, not_horn]
+  f36 ∃b (Type(b,amb) ∧ ¬OutOfService(b))
+        Some bay is always reserved for emergencies  [model check, not_horn]
+
+Model checks of the statements beyond Horn clauses (baseline day)
+  f3 holds
+  f4 holds
+  f5 holds
+  f11 holds
+  f15 holds
+  f17 holds
+  f19 holds
+  f21 holds
+  f22 holds
+  f23 holds
+  f24 holds
+  f25 holds
+  f26 holds
+  f27 holds
+  f28 holds
+  f29 holds
+  f32 holds
+  f33 holds
+  f34 holds
+  f35 holds
+  f36 holds

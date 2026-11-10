@@ -1,0 +1,70 @@
+
+==============================================================================
+Frames (local value -> if-needed -> inherited -> default)
+==============================================================================
+30 class frames, 16 instance frames
+
+noor   is-a: [noor,Patient,BadgeHolder,Person,Thing]
+    appointment_dept  = oncology                    (local value)
+    appointment_time  = 600                         (local value)
+    banned            = false                       (default facet of Person)
+    cleared           = true                        (if-needed demon of Person)
+    disability_badge  = true                        (inherited from BadgeHolder)
+    drives            = wv_no                       (local value)
+    fee_band          = first 2 h free, then PKR 50/h(default facet of Patient)
+    name              = Noor                        (local value)
+    preferred_zone    = accessible                  (default facet of BadgeHolder)
+    role              = patient                     (inherited from Patient)
+
+rukhsana   is-a: [rukhsana,Visitor,ExpectantMother,Person,Thing]
+    banned            = false                       (default facet of Person)
+    cleared           = true                        (if-needed demon of Person)
+    drives            = car_ru                      (local value)
+    fee_band          = PKR 100 first hour, PKR 50/h after(default facet of Visitor)
+    name              = Rukhsana                    (local value)
+    notify_ward       = true                        (default facet of ExpectantMother)
+    preferred_zone    = maternity                   (default facet of ExpectantMother)
+    role              = visitor                     (inherited from Visitor)
+    ward              = maternity                   (local value)
+
+bushra   is-a: [bushra,AdminOfficer,Staff,Person,Thing]
+    badge_expiry      = 20261031                    (local value)
+    badge_valid       = false                       (if-needed demon of Staff)
+    banned            = false                       (default facet of Person)
+    cleared           = false                       (if-needed demon of Person)
+    destination       = admin                       (inherited from AdminOfficer)
+    drives            = car_bu                      (local value)
+    fee_band          = free                        (default facet of Staff)
+    name              = Bushra                      (local value)
+    role              = admin                       (inherited from AdminOfficer)
+
+ev_sa   is-a: [ev_sa,ElectricCar,Car,Vehicle,Thing]
+    anpr_confidence   = 98                          (local value)
+    arrival           = 425                         (local value)
+    battery_pct       = 22                          (local value)
+    class             = ev                          (inherited from ElectricCar)
+    height_cm         = 150                         (default facet of Vehicle)
+    identified        = true                        (if-needed demon of Vehicle)
+    needs_charge      = true                        (if-needed demon of ElectricCar)
+    plate             = KHI-EV-2210                 (local value)
+    wheels            = 4                           (default facet of Car)
+
+wv_no   is-a: [wv_no,WheelchairVan,Van,Vehicle,Thing]
+    anpr_confidence   = 94                          (local value)
+    arrival           = 585                         (local value)
+    class             = wheelchair_van              (inherited from WheelchairVan)
+    height_cm         = 230                         (default facet of WheelchairVan)
+    identified        = true                        (if-needed demon of Vehicle)
+    max_level         = ground_only                 (if-needed demon of Van)
+    plate             = KHI-WV-0412                 (local value)
+    ramp              = rear                        (default facet of WheelchairVan)
+
+amb1   is-a: [amb1,AmbulanceBay,Bay,Thing]
+    bay_type          = amb                         (inherited from AmbulanceBay)
+    keep_clear        = true                        (inherited from AmbulanceBay)
+    sensor            = ultrasonic                  (default facet of Bay)
+    status            = vacant                      (default facet of Bay)
+    width_m           = 3.5                         (inherited from AmbulanceBay)
+    zone              = z_amb                       (local value)
+
+put(ev_sa, occupies, ev1) fired the if-added demon: occupied(ev1,ev_sa)

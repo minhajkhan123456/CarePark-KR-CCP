@@ -1,0 +1,112 @@
+
+==============================================================================
+Description logic
+==============================================================================
+TBox: 89 axioms
+  Staff ⊑ Person
+  Patient ⊑ Person
+  Visitor ⊑ Person
+  Supplier ⊑ Person
+  Doctor ⊑ Staff
+  Nurse ⊑ Staff
+  Paramedic ⊑ Staff
+  AdminOfficer ⊑ Staff
+  Clinician ⊑ Staff
+  OnCallDoctor ⊑ Doctor
+  BadgeHolder ⊑ Person
+  ExpectantMother ⊑ Person
+  ClearedPerson ⊑ Person
+  BannedPerson ⊑ Person
+  OnShiftStaff ⊑ Staff
+  Car ⊑ Vehicle
+  SUV ⊑ Car
+  ElectricCar ⊑ Car
+  PetrolCar ⊑ Car
+  Van ⊑ Vehicle
+  WheelchairVan ⊑ Van
+  Ambulance ⊑ Van
+  Motorcycle ⊑ Vehicle
+  EmergencyVehicle ⊑ Vehicle
+  AdmittedVehicle ⊑ Vehicle
+  LowBatteryEV ⊑ ElectricCar
+  TallVehicle ⊑ Vehicle
+  UnregisteredVehicle ⊑ Vehicle
+  AmbulanceBay ⊑ Bay
+  AccessibleBay ⊑ Bay
+  ChargerBay ⊑ Bay
+  LoadingBay ⊑ Bay
+  DropOffBay ⊑ Bay
+  StandardBay ⊑ Bay
+  FamilyBay ⊑ Bay
+  ClosedBay ⊑ Bay
+  GroundZone ⊑ Zone
+  UpperZone ⊑ Zone
+  Staff ⊓ Visitor ⊑ ⊥
+  Staff ⊓ Supplier ⊑ ⊥
+  Patient ⊓ Supplier ⊑ ⊥
+  Visitor ⊓ Supplier ⊑ ⊥
+  Doctor ⊓ Nurse ⊑ ⊥
+  Doctor ⊓ Paramedic ⊑ ⊥
+  Doctor ⊓ AdminOfficer ⊑ ⊥
+  Nurse ⊓ Paramedic ⊑ ⊥
+  Nurse ⊓ AdminOfficer ⊑ ⊥
+  Paramedic ⊓ AdminOfficer ⊑ ⊥
+  Car ⊓ Van ⊑ ⊥
+  Car ⊓ Motorcycle ⊑ ⊥
+  Van ⊓ Motorcycle ⊑ ⊥
+  ElectricCar ⊓ PetrolCar ⊑ ⊥
+  SUV ⊓ ElectricCar ⊑ ⊥
+  SUV ⊓ PetrolCar ⊑ ⊥
+  AmbulanceBay ⊓ AccessibleBay ⊑ ⊥
+  AmbulanceBay ⊓ ChargerBay ⊑ ⊥
+  AmbulanceBay ⊓ StandardBay ⊑ ⊥
+  AccessibleBay ⊓ StandardBay ⊑ ⊥
+  ChargerBay ⊓ StandardBay ⊑ ⊥
+  LoadingBay ⊓ StandardBay ⊑ ⊥
+  DropOffBay ⊓ StandardBay ⊑ ⊥
+  GroundZone ⊓ UpperZone ⊑ ⊥
+  Person ⊓ Vehicle ⊑ ⊥
+  Vehicle ⊓ Bay ⊑ ⊥
+  ClearedPerson ⊓ BannedPerson ⊑ ⊥
+  PetrolCar ≡ Car ⊓ ¬ElectricCar ⊓ ¬SUV
+  OnCallDoctor ≡ Doctor ⊓ ∃onCall.{true}
+  Clinician ≡ Doctor ⊔ Nurse
+  OnShiftStaff ≡ Staff ⊓ ∃shift.(∋ arrivalTime)
+  ClearedPerson ≡ (Staff ⊓ ∃badge.ValidBadge ⊓ ¬BannedPerson) ⊔ ((Patient ⊔ Visitor) ⊓ ¬BannedPerson) ⊔ (Supplier ⊓ ∃slot.(∋ arrivalTime))
+  AdmittedVehicle ≡ EmergencyVehicle ⊔ ∃declared.Emergency ⊔ (Identified ⊓ ∃drivenBy.ClearedPerson)
+  EmergencyVehicle ≡ Ambulance ⊓ ∃onRun.{true}
+  LowBatteryEV ≡ ElectricCar ⊓ ∃battery.(< 30)
+  TallVehicle ≡ Vehicle ⊓ ∃height.(> 210)
+  UnregisteredVehicle ≡ Vehicle ⊓ ¬Registered
+  UpperZone ≡ Zone ⊓ ∃onLevel.(∃clearance.(≤ 210))
+  TallVehicle ⊑ ∀parkedIn.(∃inZone.GroundZone)
+  AmbulanceBay ⊑ ∀occupiedBy.EmergencyVehicle
+  AccessibleBay ⊑ ∀occupiedBy.(∃drivenBy.BadgeHolder)
+  ChargerBay ⊑ ∀occupiedBy.ElectricCar
+  ChargerBay ⊑ ∃hasCharger.Charger
+  Bay ⊑ (= 1 inZone.Zone)
+  Zone ⊑ (= 1 onLevel.Level)
+  Vehicle ⊑ (≤ 1 drivenBy.Person)
+  Bay ⊑ (≤ 1 occupiedBy.Vehicle)
+  Vehicle ⊑ (≤ 1 parkedIn.Bay)
+  drivenBy ≡ drives⁻
+  occupiedBy ≡ parkedIn⁻
+  Patient ⊑ ∃has.Appointment ⊔ ∃visits.Department
+
+Inferred by transitivity: [AdminOfficer-Person,Ambulance-Vehicle,Clinician-Person,Doctor-Person,ElectricCar-Vehicle,LowBatteryEV-Car,LowBatteryEV-Vehicle,Nurse-Person,OnCallDoctor-Person,OnCallDoctor-Staff,OnShiftStaff-Person,Paramedic-Person,PetrolCar-Vehicle,SUV-Vehicle,WheelchairVan-Vehicle]
+
+Realisation (most specific concepts)
+  saad      [ClearedPerson,OnCallDoctor,OnShiftStaff]
+  noor      [BadgeHolder,ClearedPerson,Patient]
+  rukhsana  [ClearedPerson,ExpectantMother,Visitor]
+  waqar     [BannedPerson,Visitor]
+  bushra    [AdminOfficer,OnShiftStaff]
+  ev_sa     [AdmittedVehicle,LowBatteryEV]
+  wv_no     [AdmittedVehicle,TallVehicle,WheelchairVan]
+  amb_fa    [AdmittedVehicle,Ambulance,EmergencyVehicle,TallVehicle]
+  car_ya    [PetrolCar]
+  amb1      [AmbulanceBay]
+  ev2       [ChargerBay]
+  z_patient [UpperZone]
+
+ABox consistent

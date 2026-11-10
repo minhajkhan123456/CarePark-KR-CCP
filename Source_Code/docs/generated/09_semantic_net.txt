@@ -1,0 +1,90 @@
+
+==============================================================================
+Semantic network
+==============================================================================
+61 nodes, 79 links: [at-2,delivers_to-1,drives-5,has-2,has_a-10,instance_of-16,is_a-25,limited_by-1,occupies-1,part_of-9,reads-1,shows-1,visits-2,walk_to-1,works_in-2]
+
+  Staff --is_a--> Person
+  Patient --is_a--> Person
+  Visitor --is_a--> Person
+  Supplier --is_a--> Person
+  Doctor --is_a--> Staff
+  Nurse --is_a--> Staff
+  Paramedic --is_a--> Staff
+  AdminOfficer --is_a--> Staff
+  BadgeHolder --is_a--> Person
+  ExpectantMother --is_a--> Person
+  OnCallDoctor --is_a--> Doctor
+  Car --is_a--> Vehicle
+  SUV --is_a--> Car
+  ElectricCar --is_a--> Car
+  Van --is_a--> Vehicle
+  WheelchairVan --is_a--> Van
+  Ambulance --is_a--> Van
+  Motorcycle --is_a--> Vehicle
+  AmbulanceBay --is_a--> Bay
+  AccessibleBay --is_a--> Bay
+  ChargerBay --is_a--> Bay
+  LoadingBay --is_a--> Bay
+  DropOffBay --is_a--> Bay
+  StandardBay --is_a--> Bay
+  FamilyBay --is_a--> Bay
+  Bay --part_of--> Zone
+  Zone --part_of--> Level
+  Level --part_of--> CarPark
+  Gate --part_of--> CarPark
+  Ramp --part_of--> CarPark
+  CarPark --part_of--> Hospital
+  Department --part_of--> Hospital
+  Vehicle --has_a--> NumberPlate
+  ElectricCar --has_a--> Battery
+  ChargerBay --has_a--> Charger
+  Bay --has_a--> OccupancySensor
+  Gate --has_a--> ANPRCamera
+  Gate --has_a--> Barrier
+  CarPark --has_a--> DisplayBoard
+  Staff --has_a--> StaffBadge
+  Ambulance --has_a--> Siren
+  Level --has_a--> Clearance
+  Person --drives--> Vehicle
+  Staff --works_in--> Department
+  Patient --has--> Appointment
+  Appointment --at--> Department
+  Visitor --visits--> Department
+  Supplier --delivers_to--> Department
+  Zone --walk_to--> Department
+  Vehicle --occupies--> Bay
+  ANPRCamera --reads--> NumberPlate
+  Ramp --limited_by--> Clearance
+  Paramedic --drives--> Ambulance
+  DisplayBoard --shows--> Route
+  saad --instance_of--> OnCallDoctor
+  ev_sa --instance_of--> ElectricCar
+  saad --drives--> ev_sa
+  saad --works_in--> cardiology
+  cardiology --instance_of--> Department
+  noor --instance_of--> Patient
+  noor --instance_of--> BadgeHolder
+  wv_no --instance_of--> WheelchairVan
+  noor --drives--> wv_no
+  noor --has--> appt_noor
+  appt_noor --instance_of--> Appointment
+  appt_noor --at--> oncology
+  oncology --instance_of--> Department
+  faisal --instance_of--> Paramedic
+  amb_fa --instance_of--> Ambulance
+  faisal --drives--> amb_fa
+  amb1 --instance_of--> AmbulanceBay
+  amb1 --part_of--> z_amb
+  z_amb --instance_of--> Zone
+  z_amb --part_of--> g
+  g --instance_of--> Level
+  rukhsana --instance_of--> ExpectantMother
+  rukhsana --instance_of--> Visitor
+  rukhsana --visits--> maternity
+  maternity --instance_of--> Department
+
+classes_of(ev_sa) = [ElectricCar,Car,Vehicle]
+inherited parts of ev_sa = [ElectricCar-Battery,Vehicle-NumberPlate]
+part-of chain of amb1 = [z_amb,g]
+path noor ~> oncology = [step(noor,has,appt_noor),step(appt_noor,at,oncology)]

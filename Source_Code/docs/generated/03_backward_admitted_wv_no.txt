@@ -1,0 +1,67 @@
+
+==============================================================================
+Backward chaining: admitted(wv_no)
+==============================================================================
+CALL  admitted(wv_no)
+      try a5: emergency_vehicle(wv_no)
+|  CALL  emergency_vehicle(wv_no)
+|        try h17: vclass(wv_no,ambulance), emergency_run(wv_no)
+|  |  CALL  vclass(wv_no,ambulance)
+|  |  FAIL  vclass(wv_no,ambulance)
+|  FAIL  emergency_vehicle(wv_no)
+      try a6: emergency_declared(wv_no), arrival(wv_no,_10350)
+|  CALL  emergency_declared(wv_no)
+|  FAIL  emergency_declared(wv_no)
+      try a7: arrival(wv_no,_10374), identified(wv_no), drives(_10394,wv_no), cleared(_10394)
+|  CALL  arrival(wv_no,_10374)
+|  EXIT  arrival(wv_no,585)
+|  CALL  identified(wv_no)
+|        try s1: anpr(wv_no,_10708), ge(_10708,90)
+|  |  CALL  anpr(wv_no,_10708)
+|  |  EXIT  anpr(wv_no,94)
+|  |  CALL  ge(94,90)
+|  |  EXIT  ge(94,90)
+|  EXIT  identified(wv_no)
+|  CALL  drives(_10394,wv_no)
+|  EXIT  drives(noor,wv_no)
+|  CALL  cleared(noor)
+|        try a1: staff_member(noor), badge_valid(noor), not banned(noor)
+|  |  CALL  staff_member(noor)
+|  |        try h1: doctor(noor)
+|  |  |  CALL  doctor(noor)
+|  |  |  FAIL  doctor(noor)
+|  |        try h2: nurse(noor)
+|  |  |  CALL  nurse(noor)
+|  |  |  FAIL  nurse(noor)
+|  |        try h3: admin(noor)
+|  |  |  CALL  admin(noor)
+|  |  |  FAIL  admin(noor)
+|  |        try h4: paramedic(noor)
+|  |  |  CALL  paramedic(noor)
+|  |  |  FAIL  paramedic(noor)
+|  |  FAIL  staff_member(noor)
+|        try a2: patient(noor), not banned(noor)
+|  |  CALL  patient(noor)
+|  |  EXIT  patient(noor)
+|  |  CALL  not banned(noor)
+|  |  |  CALL  banned(noor)
+|  |  |        try s5: security_ban(noor)
+|  |  |  |  CALL  security_ban(noor)
+|  |  |  |  FAIL  security_ban(noor)
+|  |  |  FAIL  banned(noor)
+|  |  EXIT  not banned(noor)
+|  EXIT  cleared(noor)
+EXIT  admitted(wv_no)
+
+RESULT: proved admitted(wv_no)
+
+Proof tree
+admitted(wv_no)  <a7>
+  arrival(wv_no,585)  <fact>
+  identified(wv_no)  <s1>
+    anpr(wv_no,94)  <fact>
+    ge(94,90)  <builtin>
+  drives(noor,wv_no)  <fact>
+  cleared(noor)  <a2>
+    patient(noor)  <fact>
+    not banned(noor)  <naf>

@@ -1,0 +1,22 @@
+flowchart LR
+  Thing --> Person & Vehicle & Level & Zone & Bay & Department & Appointment
+  Person --> Staff & Patient & Visitor & Supplier & BadgeHolder & ExpectantMother
+  Staff --> Doctor & Nurse & Paramedic & AdminOfficer
+  Vehicle --> Car & Van & Motorcycle
+  Car --> SUV & ElectricCar
+  Van --> WheelchairVan & Ambulance
+  Bay --> AmbulanceBay & AccessibleBay & ChargerBay & LoadingBay & DropOffBay
+  Patient -.instance.-> noor
+  BadgeHolder -.instance.-> noor
+  Visitor -.instance.-> rukhsana
+  ExpectantMother -.instance.-> rukhsana
+  Doctor -.instance.-> saad
+  AdminOfficer -.instance.-> bushra
+  Visitor -.instance.-> waqar
+  ElectricCar -.instance.-> ev_sa
+  WheelchairVan -.instance.-> wv_no
+  Ambulance -.instance.-> amb_fa
+  AmbulanceBay -.instance.-> amb1
+  AccessibleBay -.instance.-> ac1
+  classDef inst fill:#e6f2ec,stroke:#0a6b4e
+  class noor,rukhsana,saad,bushra,waqar,ev_sa,wv_no,amb_fa,amb1,ac1 inst

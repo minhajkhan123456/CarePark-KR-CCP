@@ -1,0 +1,39 @@
+
+==============================================================================
+Backward chaining: dropoff_overstay(car_ks)
+==============================================================================
+CALL  dropoff_overstay(car_ks)
+      try w8: assigned(car_ks,_145342), bay_type(_145342,drop), stay(car_ks,_145366), dropoff_limit(car_ks,_145378), gt(_145366,_145378)
+|  CALL  assigned(car_ks,_145342)
+|  EXIT  assigned(car_ks,dr1)
+|  CALL  bay_type(dr1,drop)
+|  EXIT  bay_type(dr1,drop)
+|  CALL  stay(car_ks,_145366)
+|  EXIT  stay(car_ks,20)
+|  CALL  dropoff_limit(car_ks,_145378)
+|        try w6: emergency_declared(car_ks)
+|  |  CALL  emergency_declared(car_ks)
+|  |  FAIL  emergency_declared(car_ks)
+|        try w7: assigned(car_ks,_145834), not emergency_declared(car_ks)
+|  |  CALL  assigned(car_ks,_145834)
+|  |  EXIT  assigned(car_ks,dr1)
+|  |  CALL  not emergency_declared(car_ks)
+|  |  |  CALL  emergency_declared(car_ks)
+|  |  |  FAIL  emergency_declared(car_ks)
+|  |  EXIT  not emergency_declared(car_ks)
+|  EXIT  dropoff_limit(car_ks,15)
+|  CALL  gt(20,15)
+|  EXIT  gt(20,15)
+EXIT  dropoff_overstay(car_ks)
+
+RESULT: proved dropoff_overstay(car_ks)
+
+Proof tree
+dropoff_overstay(car_ks)  <w8>
+  assigned(car_ks,dr1)  <fact>
+  bay_type(dr1,drop)  <fact>
+  stay(car_ks,20)  <fact>
+  dropoff_limit(car_ks,15)  <w7>
+    assigned(car_ks,dr1)  <fact>
+    not emergency_declared(car_ks)  <naf>
+  gt(20,15)  <builtin>

@@ -1,0 +1,18 @@
+flowchart LR
+  T["⊤ Thing"] --> Person & Vehicle & Bay & Zone
+  Person --> Staff & Patient & Visitor & Supplier & BadgeHolder & ExpectantMother & ClearedPerson & BannedPerson
+  Staff --> Doctor & Nurse & Paramedic & AdminOfficer & Clinician & OnShiftStaff
+  Doctor --> OnCallDoctor
+  Vehicle --> Car & Van & Motorcycle & EmergencyVehicle & AdmittedVehicle & TallVehicle & UnregisteredVehicle
+  Car --> SUV & ElectricCar & PetrolCar
+  ElectricCar --> LowBatteryEV
+  Van --> WheelchairVan & Ambulance
+  Bay --> AmbulanceBay & AccessibleBay & ChargerBay & LoadingBay & DropOffBay & StandardBay & FamilyBay & ClosedBay
+  Zone --> GroundZone & UpperZone
+  ClearedPerson x--x|disjoint| BannedPerson
+  ElectricCar x--x|disjoint| PetrolCar
+  GroundZone x--x|disjoint| UpperZone
+  N1["Clinician ≡ Doctor ⊔ Nurse"]:::def
+  N2["EmergencyVehicle ≡ Ambulance ⊓ ∃onRun.{true}"]:::def
+  N3["AdmittedVehicle ≡ EmergencyVehicle ⊔ ∃declared.Emergency ⊔ (Identified ⊓ ∃drivenBy.ClearedPerson)"]:::def
+  classDef def fill:#fff7e0,stroke:#b07800

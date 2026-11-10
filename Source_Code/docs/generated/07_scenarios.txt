@@ -1,0 +1,28 @@
+
+==============================================================================
+Test scenarios
+==============================================================================
+  tc01 Ordinary Tuesday (baseline)                            pass []
+  tc02 Code red at the emergency department                   pass []
+  tc03 Staff level full                                       pass []
+  tc04 Visitor level closed, dry weather                      pass []
+  tc05 Visitor level closed and raining                       pass []
+  tc06 Saad's EV is charged                                   pass []
+  tc07 Saad off call with a charged EV                        pass []
+  tc08 Waqar's ban is lifted                                  pass []
+  tc09 Yasir's plate re-read at 93%                           pass []
+  tc10 Bushra's badge is renewed                              pass []
+  tc11 Accessible bays closed: Noor's van is too tall         pass []
+  tc12 Delivery van misses its slot                           pass []
+  tc13 Tahir arrives on time                                  pass []
+  tc14 Kashif visits in the evening                           pass []
+  tc15 Dr Areeba arrives two hours early                      pass []
+  tc16 Unknown car blocks an ambulance bay                    pass []
+  tc17 Both ambulance bays blocked                            pass []
+  tc18 Two ambulances at 09:00                                pass []
+  tc19 Drop-off congestion: Kashif waits                      pass []
+  tc20 Inconsistent data: car with two classes                pass []
+  tc21 Inconsistent data: doctor recorded as a visitor        pass []
+  tc22 Inconsistent data: badge expires before issue          pass []
+
+22/22 scenarios pass

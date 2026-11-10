@@ -1,0 +1,15 @@
+flowchart TB
+  G["solve(Goal)"] --> D{"depth > 40?"}
+  D -- yes --> F0["FAIL depth_limit"]
+  D -- no --> N{"Goal = not(A)?"}
+  N -- yes --> NA["solve(A)<br/>success → FAIL<br/>failure → EXIT"]
+  N -- no --> BI{"builtin?<br/>lt le gt ge eq neq add sub mul cdiv"}
+  BI -- yes --> EV["evaluate → EXIT / FAIL"]
+  BI -- no --> CA["log CALL"]
+  CA --> FA{"base fact b(Goal)?"}
+  FA -- yes --> EX["EXIT (fact)"]
+  FA -- no / REDO --> RU["next rule r(Id,H,B)<br/>rename, unify H=Goal<br/>log TRY"]
+  RU --> SL["solve body left→right"]
+  SL -- all succeed --> EX2["EXIT (rule Id)"]
+  SL -- fails --> RU
+  RU -- no more rules --> FL["log FAIL → why_not explainer"]
